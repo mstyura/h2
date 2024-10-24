@@ -178,7 +178,13 @@ impl FlowControl {
         // If send size is zero it's meaningless to update flow control window
         if sz > 0 {
             // Ensure that the argument is correct
-            assert!(self.window_size.0 >= sz as i32);
+            assert!(
+                self.window_size.0 >= sz as i32,
+                "size out of window capacity sz={}; window={}; available={}",
+                sz,
+                self.window_size,
+                self.available
+            );
 
             // Update values
             self.window_size.decrease_by(sz)?;
