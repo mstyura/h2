@@ -767,7 +767,17 @@ impl Prioritize {
 
                             // There *must* be be enough connection level
                             // capacity at this point.
-                            debug_assert!(len <= self.flow.window_size());
+                            assert!(
+                                len <= self.flow.window_size(),
+                                "data len out of connection flow capacity: len={len}, csz={csz}, sz={sz}, eos={eos}, window={window}, available={available}, requested={requested}, buffered={buffered}`",
+                                csz = self.flow.window_size(),
+                                sz = sz,
+                                eos = frame.is_end_stream(),
+                                window = stream_capacity,
+                                available = stream.send_flow.available(),
+                                requested = stream.requested_send_capacity,
+                                buffered = stream.buffered_send_data
+                            );
 
                             // Check if the stream level window the peer knows is available. In some
                             // scenarios, maybe the window we know is available but the window which
