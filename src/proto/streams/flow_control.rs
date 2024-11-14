@@ -3,6 +3,8 @@ use crate::proto::{WindowSize, MAX_WINDOW_SIZE};
 
 use std::fmt;
 
+use super::frame::StreamId;
+
 // We don't want to send WINDOW_UPDATE frames for tiny changes, but instead
 // aggregate them when the changes are significant. Many implementations do
 // this by keeping a "ratio" of the update version the allowed window size.
@@ -27,6 +29,12 @@ fn sanity_unclaimed_ratio() {
 }
 
 #[derive(Copy, Clone, Debug)]
+enum FlowControlDirection {
+    Send,
+    Recv,
+}
+
+#[derive(Copy, Clone, Debug)]
 pub struct FlowControl {
     /// Window the peer knows about.
     ///
@@ -46,13 +54,23 @@ pub struct FlowControl {
     /// This can go negative if a user declares a smaller target window than
     /// the peer knows about.
     available: Window,
+
+    stream_id: StreamId,
+
+    direction: FlowControlDirection,
 }
 
 impl FlowControl {
-    pub fn new() -> FlowControl {
+    pub fn new(id: StreamId, outgoing: bool) -> FlowControl {
         FlowControl {
             window_size: Window(0),
             available: Window(0),
+            stream_id: id,
+            direction: if outgoing {
+                FlowControlDirection::Send
+            } else {
+                FlowControlDirection::Recv
+            },
         }
     }
 

@@ -144,8 +144,8 @@ pub(super) struct NextResetExpire;
 
 impl Stream {
     pub fn new(id: StreamId, init_send_window: WindowSize, init_recv_window: WindowSize) -> Stream {
-        let mut send_flow = FlowControl::new();
-        let mut recv_flow = FlowControl::new();
+        let mut send_flow = FlowControl::new(id, true);
+        let mut recv_flow = FlowControl::new(id, false);
 
         recv_flow
             .inc_window(init_recv_window)

@@ -82,7 +82,7 @@ pub(crate) struct Prioritized<B> {
 
 impl Prioritize {
     pub fn new(config: &Config) -> Prioritize {
-        let mut flow = FlowControl::new();
+        let mut flow = FlowControl::new(StreamId::zero(), true);
 
         flow.inc_window(config.remote_init_window_sz)
             .expect("invalid initial window size");
@@ -769,13 +769,12 @@ impl Prioritize {
                             // capacity at this point.
                             assert!(
                                 len <= self.flow.window_size(),
-                                "data len out of connection flow capacity: len={len}, csz={csz}, cavl={win_avl}, sz={sz}, eos={eos}, window={window}, available={available}, requested={requested}, buffered={buffered}`",
-                                csz = self.flow.window_size(),
-                                win_avl = self.flow.available(),
+                                "data len out of connection flow capacity: len={len}, conn_flow={conn_flow:?}, stream_send_flow={stream_send_flow:?}, sz={sz}, eos={eos}, window={window}, requested={requested}, buffered={buffered}`",
+                                conn_flow = self.flow,
                                 sz = sz,
                                 eos = frame.is_end_stream(),
                                 window = stream_capacity,
-                                available = stream.send_flow.available(),
+                                stream_send_flow = stream.send_flow,
                                 requested = stream.requested_send_capacity,
                                 buffered = stream.buffered_send_data
                             );

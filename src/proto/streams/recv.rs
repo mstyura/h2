@@ -84,7 +84,7 @@ impl Recv {
     pub fn new(peer: peer::Dyn, config: &Config) -> Self {
         let next_stream_id = if peer.is_server() { 1 } else { 2 };
 
-        let mut flow = FlowControl::new();
+        let mut flow = FlowControl::new(StreamId::zero(), false);
 
         // connections always have the default window size, regardless of
         // settings
